@@ -21,6 +21,26 @@ export const Information1 = () => {
           장소: LL층 연회장
         </div>
       </div>
+
+      <div className="info-card">
+        <div className="label">사진 보내기</div>
+        <div className="content">
+          감사한 마음을 담아 예식 사진을 공유해주시면 감사하겠습니다.
+          아래 버튼을 눌러 사진을 업로드해주세요.
+        </div>
+        <div className="break" />
+        <Button
+          style={{ width: "100%" }}
+          onClick={() => {
+            window.open(
+              "https://drive.google.com/drive/u/0/folders/1mPPOLNUcO-GTeDpOscUi6uq8EqY2hJ8A",
+              "_blank",
+            )
+          }}
+        >
+          사진 업로드
+        </Button>
+      </div>
     </>
   )
 }
