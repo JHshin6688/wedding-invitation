@@ -131,46 +131,52 @@ const UploadModal = ({
   onClose: () => void
 }) => {
   const [loading, setLoading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(
+    null,
+  )
+  const [previews, setPreviews] = useState<string[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setSelectedFile(file)
-    const url = URL.createObjectURL(file)
-    setPreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev)
-      return url
+    const files = Array.from(e.target.files ?? [])
+    if (files.length === 0) return
+    setSelectedFiles(files)
+    setPreviews((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url))
+      return files.map((file) => URL.createObjectURL(file))
     })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedFile) return alert("사진을 선택해주세요.")
+    if (selectedFiles.length === 0) return alert("사진을 선택해주세요.")
 
     setLoading(true)
     try {
-      const { base64, fileName, mimeType } = await readFileAsBase64(selectedFile)
-      await fetch(PHOTO_SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify({
-          action: "upload",
-          fileData: base64,
-          mimeType,
-          fileName,
-        }),
-      })
-      alert(
-        "사진이 업로드 되었습니다.\n감사합니다.",
-      )
+      for (let i = 0; i < selectedFiles.length; i++) {
+        setProgress({ done: i, total: selectedFiles.length })
+        const { base64, fileName, mimeType } = await readFileAsBase64(
+          selectedFiles[i],
+        )
+        await fetch(PHOTO_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify({
+            action: "upload",
+            fileData: base64,
+            mimeType,
+            fileName,
+          }),
+        })
+      }
+      alert("사진이 업로드 되었습니다.\n감사합니다.")
       onSuccess()
     } catch (err) {
       console.error("[PhotoUpload] upload error:", err)
       alert(`업로드 실패: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
       setLoading(false)
+      setProgress(null)
     }
   }
 
@@ -183,14 +189,26 @@ const UploadModal = ({
         </div>
       </div>
       <div className="content">
-        {preview && (
-          <img src={preview} alt="미리보기" className="preview-image" />
+        {previews.length > 0 && (
+          <div className="preview-grid">
+            {previews.map((src, i) => (
+              <img
+                key={src}
+                src={src}
+                alt={`미리보기 ${i + 1}`}
+                className="preview-image"
+              />
+            ))}
+          </div>
         )}
         <label className="file-label">
-          {selectedFile ? selectedFile.name : "사진 선택하기"}
+          {selectedFiles.length > 0
+            ? `${selectedFiles.length}장 선택됨`
+            : "사진 선택하기 (여러 장 가능)"}
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={handleFileChange}
             style={{ display: "none" }}
             disabled={loading}
@@ -199,7 +217,9 @@ const UploadModal = ({
       </div>
       <div className="footer">
         <Button buttonStyle="style2" disabled={loading} type="submit">
-          업로드하기
+          {progress
+            ? `업로드 중 (${progress.done + 1}/${progress.total})`
+            : "업로드하기"}
         </Button>
         <Button
           buttonStyle="style2"
