@@ -4,6 +4,7 @@ import { STATIC_ONLY } from "../../env"
 import { Button } from "../button"
 import { LazyDiv } from "../lazyDiv"
 import { Modal } from "../modal"
+import { PhotoUploadButton } from "../photoUpload"
 import { AttendanceInfo } from "./attendance"
 
 /**
@@ -29,17 +30,9 @@ export const Information1 = () => {
           아래 버튼을 눌러 사진을 업로드해주세요.
         </div>
         <div className="break" />
-        <Button
-          style={{ width: "100%" }}
-          onClick={() => {
-            window.open(
-              "https://drive.google.com/drive/u/0/folders/1mPPOLNUcO-GTeDpOscUi6uq8EqY2hJ8A",
-              "_blank",
-            )
-          }}
-        >
+        <PhotoUploadButton style={{ width: "100%" }}>
           사진 업로드
-        </Button>
+        </PhotoUploadButton>
       </div>
     </>
   )
