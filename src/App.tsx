@@ -52,6 +52,11 @@ function App() {
           {!STATIC_ONLY && <GuestBook />}
         </LazyDiv>
 
+        {/*<LazyDiv className="card-group">
+          {/* 사진 공유 섹션 */}
+          {/*<PhotoBook />
+        </LazyDiv>*/}
+
         {/* 카카오톡/링크 공유 버튼 */}
         <ShareButton />
       </div>
